@@ -1,0 +1,62 @@
+---
+title: "Energy by vehicle and speed"
+author: "Kevin Verhoff"
+date: "2024-09-19"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Get data
+
+```{r}
+# Define the vehicles, weights (in pounds), and speeds (in mph)
+vehicles <- c('Road Bike','Cargo Bike','4-passenger UTV','Small Car (Focus)','Small SUV (Escape)',
+              'Large Truck/SUV (Expedition/F-150)','Large Truck (F-350)')
+weights_lb <- c(220, 350,1774, 3000, 3500, 5500, 7500)
+speeds_mph <- c(5, 10, 20, 30)
+
+# Conversion factors
+lb_to_kg <- 0.453592 # 1 pound = 0.453592 kg
+mph_to_mps <- 0.44704 # 1 mph = 0.44704 meters per second
+
+df = data.frame(Vehicle = vehicles, Weight_LB = weights_lb)
+
+# Create a data frame with all vehicle-speed combinations
+df <- merge(df, data.frame(Speed_MPH = speeds_mph))
+
+# Calculate kinetic energy in joules (KE = 1/2 * m * v^2), then convert to kilojoules (1 kJ = 1000 J)
+df$KE_kJ <- 0.5 * df$Weight_LB*lb_to_kg * ((df$Speed_MPH * mph_to_mps)^2) / 1000
+
+df$Vehicle <- factor(df$Vehicle, levels = c('Road Bike','Cargo Bike','4-passenger UTV','Small Car (Focus)','Small SUV (Escape)',
+                                            'Large Truck/SUV (Expedition/F-150)','Large Truck (F-350)'))
+
+
+# View the dataframe
+df
+```
+
+```{r}
+library(ggplot2)
+ggplot(data=df,aes(x=Vehicle,y=KE_kJ,fill=as.factor(Speed_MPH))) +
+  geom_bar(stat='identity',position='dodge') +
+  scale_fill_manual(values =  c("#DEEDCF", 
+                                "#99D492", 
+                                #"#39A96B", 
+                                "#188977", 
+                                "#0A2F51")) +
+  labs(title = 'Kinetic Energy by Vehicle & Speed',
+       subtitle = 'Kinetic Energy increases dramatically at higher weights and speeds',
+       y='Kinetic Energy (kJ)',
+       x='Vehicle') +
+  theme_minimal() +
+  scale_x_discrete(labels = label_wrap(16)) +
+  guides(fill = guide_legend(title = "Speed (MPH)")) +
+  theme(legend.position="bottom",
+        plot.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.border = element_blank())
+```
+
