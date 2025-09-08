@@ -242,3 +242,106 @@ library(htmlwidgets)
 saveWidget(p, "4leaf_solar_payments.html", selfcontained = TRUE)
 ```
 
+
+```{r}
+library(emo)
+#per acre output of solar vs. corn
+solar_v_eth = data.frame(categories = c('🌽 Corn Ethanol','☀️ Solar Electric'),
+                miles = c(9523,803586),
+                houses = c(37/31, 37),
+                acres_to_get_one_day_indy = c(1589, 41) #Indianapois uses about 16.4 Million KwH per day 
+        )
+
+ggplot(solar_v_eth,aes(x=categories,y=miles)) +
+  geom_col(fill = c("#f59e0b", "#4ade80")) +
+  geom_text(aes(label = paste0(scales::comma(miles),' Miles 🚗')), vjust = -0.5, size = 5) +
+  theme_minimal(base_size = 12) +
+  scale_y_continuous(labels = scales::comma, limits=c(0,850000)) +
+  labs(
+    title = "How Many Miles Can a Car Go on One Acre?",
+    subtitle = "Comparing a car powered by one Acre of Ethanol vs. one Acre of Solar*",
+    caption = "*For One Year of Cultivation or Solar Production using averages for Wisconsin\nSource: Clean Wisconsin Corn Ethanol vs. Solar Land Use Comparison Report - Jan 2023",
+    x = NULL,
+    y = "How many miles?"
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, face = "italic"),
+    plot.caption= element_text(hjust = 0, size = 9, face = "italic"),
+    legend.position = "bottom",
+    legend.text = element_text(hjust = 0.5),
+    legend.justification = "center",
+    panel.grid = element_blank(),
+    axis.text.x = element_text(family = "Noto Color Emoji", size = 16, color='black'),
+    plot.title.position = "plot",
+    plot.caption.position = "plot",
+  )
+```
+
+```{r}
+solar_v_eth$tooltip_text <- paste0(
+  "A car powered by 1 acre of ", solar_v_eth$categories,
+  "\nfor a year will go ", scales::comma(solar_v_eth$miles), " miles"
+)
+
+p <- plot_ly(
+  data = solar_v_eth,
+  x = ~categories,
+  y = ~miles,
+  type = "bar",
+  text = ~paste0("🚗 Miles: ", scales::comma(miles)),
+  textfont = list(size=20),
+  textposition = "outside",
+  hoverinfo = "text",
+  hovertext = ~tooltip_text,
+  marker = list(color = c("#f59e0b", "#4ade80"))
+) %>%
+  layout(
+    title = list(
+      text = "How Many Miles Can a Car Go on One Acre?<br><sup>Comparing a car powered by one Acre of Ethanol vs. Acre of Solar*</sup>",
+      x = 0.5,
+      xanchor = "center",
+      font = list(size = 24) 
+    ),
+    yaxis = list(
+      title = "How many miles?",
+      tickformat = "~s",   # x00k format
+      range = c(0, 900000),
+      titlefont = list(size = 16),
+      tickfont = list(size = 14)
+    ),
+    xaxis = list(title = "",tickfont = list(size = 28)),
+    annotations = list(
+      list(
+        text = "*For One Year of Cultivation or Solar Production using averages for Wisconsin",
+        x = 0,
+        y = -0.2,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "left",
+        yanchor = "top",
+        showarrow = FALSE,
+        font = list(size = 12, style = "italic")
+      ),
+      list(
+        text = "Source: Clean Wisconsin Corn Ethanol vs. Solar Land Use Comparison Report - Jan 2023",
+        x = 0,
+        y = -0.25,
+        xref = "paper",
+        yref = "paper",
+        xanchor = "left",
+        yanchor = "top",
+        showarrow = FALSE,
+        font = list(size = 12, style = "italic")
+      )
+    ),
+    margin = list(t=75, b = 100) # extra space for caption
+  )
+
+p
+```
+
+```{r}
+saveWidget(p, "solar_vs_ethanol_cars.html", selfcontained = TRUE)
+```
+
