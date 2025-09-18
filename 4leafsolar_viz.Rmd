@@ -296,6 +296,7 @@ p <- plot_ly(
   marker = list(color = c("#f59e0b", "#4ade80"))
 ) %>%
   layout(
+    hoverlabel = list(font = list(size = 16)),
     title = list(
       text = "How Many Miles Can a Car Go on One Acre?<br><sup>Comparing a car powered by one Acre of Ethanol vs. Acre of Solar*</sup>",
       x = 0.5,
